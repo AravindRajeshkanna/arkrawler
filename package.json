@@ -1,0 +1,14 @@
+{
+  "name": "webcrawler",
+  "version": "1.0.0",
+  "description": "crawling the entire web",
+  "main": "webCrawler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "aravind",
+  "license": "ISC",
+  "dependencies": {
+    "crawler": "^1.0.5"
+  }
+}
