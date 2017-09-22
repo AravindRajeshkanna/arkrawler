@@ -1,9 +1,8 @@
 //Graph Data Structure
 const Graph = require('./graph');
-let graph = new Graph();
+const graph = new Graph();
 
 var index = 0;
-
 //Crawler
 const Crawler = require("crawler");
 const crawler = new Crawler({
@@ -33,4 +32,16 @@ const crawler = new Crawler({
       index++;
     }
 });
-crawler.queue(graph.getVertices());
+
+//Get seed URLs from json
+const fs = require('fs');
+fs.readFile('./seed.json', 'utf8', function (err,data) {
+  if (err) {
+    return console.log(err);
+  }
+  const urls = JSON.parse(data);
+  for(let i = 0; i < urls.length; i++) {
+      graph.addVertex(urls[i]);
+  }
+  crawler.queue(graph.getVertices());
+});
