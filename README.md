@@ -1,5 +1,5 @@
 # WebCrawler
-Crawls the entire web
+Crawls the entire web with a million seed URLs
 
 # Initial Setup
 1. Install Node.js
