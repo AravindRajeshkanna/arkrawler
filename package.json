@@ -4,11 +4,28 @@
   "description": "crawling the entire web",
   "main": "webCrawler.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "aravind",
   "license": "ISC",
   "dependencies": {
     "crawler": "^1.0.5"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AravindRajeshkanna/WebCrawler.git"
+  },
+  "keywords": [
+    "crawler",
+    "node.js",
+    "es6",
+    "data-structures",
+    "algorithms"
+  ],
+  "bugs": {
+    "url": "https://github.com/AravindRajeshkanna/WebCrawler/issues"
+  },
+  "homepage": "https://github.com/AravindRajeshkanna/WebCrawler#readme"
 }
