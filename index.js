@@ -1,9 +1,13 @@
-//Graph Data Structure
+// Graph Data Structure
 const Graph = require('./graph');
 const graph = new Graph();
 
+// Redis
+const redis = require('redis');
+const redisClient = redis.createClient();
+
 var index = 0;
-//Crawler
+// Crawler
 const Crawler = require("crawler");
 const crawler = new Crawler({
     maxConnections: 1,
@@ -20,12 +24,13 @@ const crawler = new Crawler({
                 var absoluteLinks = $("a[href^='http']");
                 absoluteLinks.each(function () {
                     var link = $(this).attr('href');
-                    // TODO: Check if link already present or not
                     graph.addVertex(link);
                     graph.addEdge(branchURL, link);
                     crawler.queue(link);
                 });
-                console.log(graph.size());
+                redisClient.sadd(graph.getVertices(), function(err, reply) {
+                    console.log(graph.size(), reply);
+                });
             }
         }
         done();
@@ -33,7 +38,7 @@ const crawler = new Crawler({
     }
 });
 
-//Get seed URLs from json
+// Get seed URLs from json
 const fs = require('fs');
 fs.readFile('./seed.json', 'utf8', function (err, data) {
     if (err) {
@@ -44,4 +49,13 @@ fs.readFile('./seed.json', 'utf8', function (err, data) {
         graph.addVertex(urls[i]);
     }
     crawler.queue(graph.getVertices());
+
+    redisClient.on('connect', function() {
+        redisClient.sadd(graph.getVertices(), function(err, reply) {
+            console.log(reply);
+        });
+        redisClient.smembers('http://youtube.com', function(err, reply) {
+            console.log(reply);
+        });
+    });
 });
