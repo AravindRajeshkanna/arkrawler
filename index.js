@@ -1,9 +1,9 @@
-//Graph Data Structure
-const Graph = require('./graph');
-const graph = new Graph();
+// Redis
+const redis = require('redis');
+const redisClient = redis.createClient();
 
 var index = 0;
-//Crawler
+// Crawler
 const Crawler = require("crawler");
 const crawler = new Crawler({
     maxConnections: 1,
@@ -15,17 +15,15 @@ const crawler = new Crawler({
             var $ = res.$;
             // Won't allow resource link
             if (typeof $ === "function") {
-                var branchURL = graph.getVertex(index);
                 // $ is Cheerio by default, a lean implementation of core jQuery designed specifically for the server
                 var absoluteLinks = $("a[href^='http']");
                 absoluteLinks.each(function () {
                     var link = $(this).attr('href');
-                    // TODO: Check if link already present or not
-                    graph.addVertex(link);
-                    graph.addEdge(branchURL, link);
                     crawler.queue(link);
+                    redisClient.sadd('seeds', link, function(err, reply) {
+                        console.log(link);
+                    });
                 });
-                console.log(graph.size());
             }
         }
         done();
@@ -33,15 +31,16 @@ const crawler = new Crawler({
     }
 });
 
-//Get seed URLs from json
+// Get seed URLs from json
 const fs = require('fs');
 fs.readFile('./seed.json', 'utf8', function (err, data) {
     if (err) {
         return console.log(err);
     }
     const urls = JSON.parse(data);
-    for (let i = 0; i < urls.length; i++) {
-        graph.addVertex(urls[i]);
-    }
-    crawler.queue(graph.getVertices());
+    crawler.queue(urls);
+    redisClient.sadd(urls);
+    redisClient.sadd('seeds', urls, function(err, reply) {
+        console.log(reply);
+    });
 });
