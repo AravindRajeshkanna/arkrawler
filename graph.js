@@ -1,38 +1,38 @@
 class Graph {
-    
-	constructor() {
+
+    constructor() {
         this.vertices = [];
-		this.edges = [];
-		this.numberOfEdges = 0;
-	}
+        this.edges = [];
+        this.numberOfEdges = 0;
+    }
 
-	getVertices() {
-	  	return this.vertices;
-	}
+    getVertices() {
+        return this.vertices;
+    }
 
-	getVertex(index) {
-		return this.vertices[index];
-	}
+    getVertex(index) {
+        return this.vertices[index];
+    }
 
-	addVertex(vertex) {
-	  this.vertices.push(vertex);
-	  this.edges[vertex] = [];
-	}
+    addVertex(vertex) {
+        this.vertices.push(vertex);
+        this.edges[vertex] = [];
+    }
 
-	addEdge(vertex1, vertex2) {
-	  this.edges[vertex1].push(vertex2);
-	  this.numberOfEdges++;
-	}
+    addEdge(vertex1, vertex2) {
+        this.edges[vertex1].push(vertex2);
+        this.numberOfEdges++;
+    }
 
-	size() {
-	  return this.vertices.length;
-	}
+    size() {
+        return this.vertices.length;
+    }
 
-	print() {
-	  console.log(this.vertices.map(function(vertex) {
-	    return (vertex + ' -> ' + this.edges[vertex].join(', ')).trim();
-	  }, this).join(' | '));
-	}
+    print() {
+        console.log(this.vertices.map(function (vertex) {
+            return (vertex + ' -> ' + this.edges[vertex].join(', ')).trim();
+        }, this).join(' | '));
+    }
 
 }
 
