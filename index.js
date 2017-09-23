@@ -5,7 +5,7 @@ const redisClient = redis.createClient();
 // Crawler
 const Crawler = require("crawler");
 const crawler = new Crawler({
-    maxConnections: 10,
+    maxConnections: 5,
     // This will be called for each crawled page
     callback: function (error, res, done) {
         if (error) {
@@ -20,7 +20,6 @@ const crawler = new Crawler({
                     var link = $(this).attr('href');
                     absoluteLinks.push(link);
                 });
-                console.log(absoluteLinks.length);
                 crawler.queue(absoluteLinks);
                 redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
                     console.log(reply);
