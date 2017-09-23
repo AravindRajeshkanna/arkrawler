@@ -2,10 +2,17 @@
 const redis = require('redis');
 const redisClient = redis.createClient();
 
+// Process
+// TODO: Need to handle heap memory size exceed issue
+const process = require('process');
+if (process.pid) {
+  console.log('This process is your pid ' + process.pid);
+}
+
 // Crawler
 const Crawler = require("crawler");
 const crawler = new Crawler({
-    maxConnections: 5,
+    maxConnections: 10,
     // This will be called for each crawled page
     callback: function (error, res, done) {
         if (error) {
