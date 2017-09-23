@@ -2,11 +2,10 @@
 const redis = require('redis');
 const redisClient = redis.createClient();
 
-var index = 0;
 // Crawler
 const Crawler = require("crawler");
 const crawler = new Crawler({
-    maxConnections: 1,
+    maxConnections: 10,
     // This will be called for each crawled page
     callback: function (error, res, done) {
         if (error) {
@@ -16,18 +15,19 @@ const crawler = new Crawler({
             // Won't allow resource link
             if (typeof $ === "function") {
                 // $ is Cheerio by default, a lean implementation of core jQuery designed specifically for the server
-                var absoluteLinks = $("a[href^='http']");
-                absoluteLinks.each(function () {
+                var absoluteLinks = [];
+                $("a[href^='http']").each(function () {
                     var link = $(this).attr('href');
-                    crawler.queue(link);
-                    redisClient.sadd('seeds', link, function(err, reply) {
-                        console.log(link);
-                    });
+                    absoluteLinks.push(link);
+                });
+                console.log(absoluteLinks.length);
+                crawler.queue(absoluteLinks);
+                redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
+                    console.log(reply);
                 });
             }
         }
         done();
-        index++;
     }
 });
 
