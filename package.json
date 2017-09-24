@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "crawler": "^1.0.5",
-    "ps-tree": "^1.1.0",
     "redis": "^2.8.0"
   },
   "devDependencies": {
