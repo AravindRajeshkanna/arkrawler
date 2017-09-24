@@ -53,10 +53,6 @@ const crawler = new Crawler({
             console.error(error);
         } else {
             var $ = res.$;
-            if (crawledPageCount > 1000 ) {
-                // Killing the process
-                kill(process.pid);
-            }
             crawledPageCount++;
             console.log('page count:' + crawledPageCount);
             redisClient.hset("crawler", "pageCount", crawledPageCount);
@@ -72,6 +68,10 @@ const crawler = new Crawler({
                 redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
                     console.log('seeds:' + reply);
                 });
+            }
+            // Killing the process to resolve heap memory issue
+            if (crawledPageCount > 1000 ) {
+                kill(process.pid);
             }
         }
         done();
