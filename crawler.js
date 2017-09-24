@@ -31,14 +31,13 @@ const crawlerInstance = new crawler({
                 redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
                     console.log('seeds:' + reply);
                 });
-                crawlerInstance.queue(absoluteLinks);
             }
         }
         done();
     }
 });
 
-// Queueing seed URLs from json
+// TODO: Need to get from redis
 fs.readFile('./seed.json', 'utf8', function (err, data) {
     if (err) {
         return console.error(err);
