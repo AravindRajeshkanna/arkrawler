@@ -16,7 +16,7 @@ fs.readFile('./seed.json', 'utf8', function (err, data) {
     });
 });
 
-// TODO: Need to perform random crawling
+// TODO: Need to check child process is ending or not
 const respawn = () => {
     var crawler = childProcess.exec(`cd ${__dirname} && node crawler.js`, function(error, stdout, stderr) {
         // TODO: Need to store it in file
