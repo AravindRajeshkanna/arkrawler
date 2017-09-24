@@ -31,25 +31,18 @@ const crawlerInstance = new crawler({
                 redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
                     console.log('seeds:' + reply);
                 });
-                // Stop queueing to resolve heap memory issue
-                if (crawledPageCount <= 2000 ) {
-                    crawlerInstance.queue(absoluteLinks);
-                }
+                crawlerInstance.queue(absoluteLinks);
             }
         }
         done();
     }
 });
 
-// Get seed URLs from json
+// Queueing seed URLs from json
 fs.readFile('./seed.json', 'utf8', function (err, data) {
     if (err) {
         return console.error(err);
     }
     const urls = JSON.parse(data);
     crawlerInstance.queue(urls);
-    redisClient.sadd(urls);
-    redisClient.sadd('seeds', urls, function(err, reply) {
-        console.log('redis init:' + reply);
-    });
 });
