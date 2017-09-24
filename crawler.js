@@ -15,31 +15,6 @@ gc.on('stats', function (stats) {
     console.log('Used heap size:' + stats.after.usedHeapSize);
 });
 
-// Kill process
-const psTree = require('ps-tree');
-const kill = function (pid, signal, callback) {
-    signal   = signal || 'SIGKILL';
-    callback = callback || function () {};
-    var killTree = true;
-    if(killTree) {
-        psTree(pid, function (err, children) {
-            [pid].concat(
-                children.map(function (p) {
-                    return p.PID;
-                })
-            ).forEach(function (tpid) {
-                try { process.kill(tpid, signal) }
-                catch (ex) { }
-            });
-            callback();
-        });
-    } else {
-        try { process.kill(pid, signal) }
-        catch (ex) { }
-        callback();
-    }
-};
-
 // Crawled page count
 var crawledPageCount = 0;
 
@@ -64,14 +39,13 @@ const crawler = new Crawler({
                     var link = $(this).attr('href');
                     absoluteLinks.push(link);
                 });
-                crawler.queue(absoluteLinks);
                 redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
                     console.log('seeds:' + reply);
                 });
-            }
-            // Killing the process to resolve heap memory issue
-            if (crawledPageCount > 1000 ) {
-                kill(process.pid);
+                // Stop queueing to resolve heap memory issue
+                if (crawledPageCount <= 2000 ) {
+                    crawler.queue(absoluteLinks);
+                }
             }
         }
         done();

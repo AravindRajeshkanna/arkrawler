@@ -1,4 +1,4 @@
-// TODO: Need to start child process after it is killed
+// TODO: Need to start child process after it is stopped
 const exec = require('child_process').exec;
 exec(`cd ${__dirname} && node crawler.js`, function(error, stdout, stderr) {
     console.log('stdout: ' + stdout);
