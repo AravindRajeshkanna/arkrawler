@@ -30,6 +30,7 @@ const crawler = new Crawler({
             var $ = res.$;
             crawledPageCount++;
             console.log('page count:' + crawledPageCount);
+            redisClient.hset("crawler", "pageCount", crawledPageCount);
             // Won't allow resource link
             if (typeof $ === "function") {
                 // $ is Cheerio by default, a lean implementation of core jQuery designed specifically for the server
