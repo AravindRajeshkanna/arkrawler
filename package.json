@@ -13,7 +13,9 @@
     "crawler": "^1.0.5",
     "redis": "^2.8.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gc-stats": "^1.0.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AravindRajeshkanna/WebCrawler.git"

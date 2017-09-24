@@ -1,7 +1,8 @@
 # WebCrawler
-Crawls the entire web with a million seed URLs
+Crawls the web with a million seed URLs as a starting point
 
 # Initial Setup
 1. Install Node.js
-2. Run 'npm install' command from the cloned repository in terminal
-3. Run 'npm start' to crawl the web
+2. Install Redis
+3. Run 'npm install' command from the cloned repository in terminal
+4. Run 'npm start' to crawl the web
