@@ -1,6 +1,5 @@
 const crawler = require("crawler");
 const redis = require('redis');
-const fs = require('fs');
 
 // Redis
 const redisClient = redis.createClient();
@@ -38,11 +37,6 @@ const crawlerInstance = new crawler({
     }
 });
 
-// TODO: Need to get from redis
-fs.readFile('./seed.json', 'utf8', function (err, data) {
-    if (err) {
-        return console.error(err);
-    }
-    const urls = JSON.parse(data);
-    crawlerInstance.queue(urls);
+redisClient.srandmember('seeds', 10000, function(err, reply) {
+    crawlerInstance.queue(reply);
 });
