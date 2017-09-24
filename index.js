@@ -1,46 +1,36 @@
-// Redis
+const childProcess = require('child_process');
 const redis = require('redis');
+const fs = require('fs');
+
+// Redis
 const redisClient = redis.createClient();
 
-// Crawler
-const Crawler = require("crawler");
-const crawler = new Crawler({
-    maxConnections: 10,
-    // This will be called for each crawled page
-    callback: function (error, res, done) {
-        if (error) {
-            console.log(error);
-        } else {
-            var $ = res.$;
-            // Won't allow resource link
-            if (typeof $ === "function") {
-                // $ is Cheerio by default, a lean implementation of core jQuery designed specifically for the server
-                var absoluteLinks = [];
-                $("a[href^='http']").each(function () {
-                    var link = $(this).attr('href');
-                    absoluteLinks.push(link);
-                });
-                console.log(absoluteLinks.length);
-                crawler.queue(absoluteLinks);
-                redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
-                    console.log(reply);
-                });
-            }
-        }
-        done();
-    }
-});
-
-// Get seed URLs from json
-const fs = require('fs');
+// Store seed URLs in redis
 fs.readFile('./seed.json', 'utf8', function (err, data) {
     if (err) {
-        return console.log(err);
+        return console.error(err);
     }
     const urls = JSON.parse(data);
-    crawler.queue(urls);
-    redisClient.sadd(urls);
     redisClient.sadd('seeds', urls, function(err, reply) {
-        console.log(reply);
+        console.log('redis init:' + reply);
     });
 });
+
+// TODO: Need to perform random crawling
+const respawn = () => {
+    var crawler = childProcess.exec(`cd ${__dirname} && node crawler.js`, function(error, stdout, stderr) {
+        // TODO: Need to store it in file
+        // console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
+        if (error !== null) {
+            console.log('exec error: ' + error);
+        }
+    });
+    crawler.on('exit', function (code, signal) {
+        console.log('exit code: ', code);
+        console.log('exit signal: ', signal);
+        console.warn('\nCNTL-C to exit.\n');
+        crawler = respawn();
+    });
+}
+respawn();
