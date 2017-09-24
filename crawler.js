@@ -29,6 +29,7 @@ const crawlerInstance = new crawler({
                     absoluteLinks.push(link);
                 });
                 redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
+                    // TODO: Need to find undefined scenario
                     console.log('seeds:' + reply);
                 });
             }

@@ -16,7 +16,7 @@ fs.readFile('./seed.json', 'utf8', function (err, data) {
     });
 });
 
-// TODO: Need to resume from last crawled url or random crawling, need to handle initial crawler queueing separately and need to handle heap memory issue
+// TODO: Need to perform random crawling
 const respawn = () => {
     var crawler = childProcess.exec(`cd ${__dirname} && node crawler.js`, function(error, stdout, stderr) {
         // TODO: Need to store it in file
