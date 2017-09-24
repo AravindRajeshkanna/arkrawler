@@ -1,26 +1,15 @@
-// Redis
+const crawler = require("crawler");
 const redis = require('redis');
+const fs = require('fs');
+
+// Redis
 const redisClient = redis.createClient();
-
-// Process
-// TODO: Need to resume the process
-const process = require('process');
-if (process.pid) {
-  console.log('This process is your pid ' + process.pid);
-}
-
-// Garbage collection statistics
-const gc = (require('gc-stats'))();
-gc.on('stats', function (stats) {
-    console.log('Used heap size:' + stats.after.usedHeapSize);
-});
 
 // Crawled page count
 var crawledPageCount = 0;
 
 // Crawler
-const Crawler = require("crawler");
-const crawler = new Crawler({
+const crawlerInstance = new crawler({
     maxConnections: 100,
     // This will be called for each crawled page
     callback: function (error, res, done) {
@@ -44,7 +33,7 @@ const crawler = new Crawler({
                 });
                 // Stop queueing to resolve heap memory issue
                 if (crawledPageCount <= 2000 ) {
-                    crawler.queue(absoluteLinks);
+                    crawlerInstance.queue(absoluteLinks);
                 }
             }
         }
@@ -53,13 +42,12 @@ const crawler = new Crawler({
 });
 
 // Get seed URLs from json
-const fs = require('fs');
 fs.readFile('./seed.json', 'utf8', function (err, data) {
     if (err) {
         return console.error(err);
     }
     const urls = JSON.parse(data);
-    crawler.queue(urls);
+    crawlerInstance.queue(urls);
     redisClient.sadd(urls);
     redisClient.sadd('seeds', urls, function(err, reply) {
         console.log('redis init:' + reply);
