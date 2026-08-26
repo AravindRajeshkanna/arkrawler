@@ -26,12 +26,16 @@ See [README.md](README.md) for how to run the crawler.
 - Create a branch off `main` for your change:
   `git checkout -b feature/short-description`.
 - Keep changes focused; unrelated fixes should be a separate pull request.
-- Add or update tests in [test/](test/) for any behavior change.
+- Add or update tests in [test/](test/) for any behavior change: unit tests
+  for pure logic in [lib/](lib/), or the integration test in
+  [test/integration/](test/integration/) for changes to the crawl flow
+  itself.
 - Run the checks below before opening a pull request:
     ```sh
     npm run lint
     npm run format:check
-    npm test
+    npm test               # unit tests, no external deps
+    npm run test:integration  # requires a local Redis; see README
     ```
 - Use clear, descriptive commit messages that explain _why_ a change was
   made, not just what changed.
@@ -42,6 +46,9 @@ See [README.md](README.md) for how to run the crawler.
 - Describe what changed and why, and call out any manual testing you did
   (for example, running the crawler end-to-end against a local Redis).
 - Link any related issues.
+- CI (see [.github/workflows/ci.yml](.github/workflows/ci.yml)) runs lint,
+  formatting, unit tests, and the integration test automatically on every
+  pull request — make sure it's green before requesting review.
 - Be responsive to review feedback; a maintainer will merge once the change
   is approved and checks pass.
 

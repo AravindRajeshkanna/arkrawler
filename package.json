@@ -9,7 +9,9 @@
     },
     "scripts": {
         "start": "node index.js",
-        "test": "node --test",
+        "test": "node --test test/*.test.js",
+        "test:integration": "node --test test/integration/*.test.js",
+        "test:coverage": "node --test --experimental-test-coverage test/*.test.js",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
