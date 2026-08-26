@@ -1,47 +1,62 @@
-const crawler = require("crawler");
-const redis = require('redis');
-const process = require('process');
+import Crawler from 'crawler';
+import { createClient } from 'redis';
 
-// Redis
-const redisClient = redis.createClient();
+import { config } from './lib/config.js';
+import { extractAbsoluteLinks } from './lib/links.js';
 
-// Crawled page count for single child process
-var crawledPageCount = 0;
+const client = createClient({ url: config.redisUrl });
+client.on('error', (err) => console.error('Redis Client Error', err));
 
-// Crawler
-const crawlerInstance = new crawler({
-    maxConnections: 100,
-    // This will be called for each crawled page
-    callback: function(error, res, done) {
+let crawledPageCount = 0;
+
+function exitWhenDone() {
+    if (crawledPageCount >= config.pagesPerRun) {
+        client.quit().finally(() => process.exit(0));
+    }
+}
+
+const crawlerInstance = new Crawler({
+    maxConnections: config.maxConnections,
+    // Called for each crawled page.
+    callback(error, res, done) {
         if (error) {
             console.error(error);
-        } else {
-            var $ = res.$;
-            crawledPageCount++;
-            console.log(`page count:${crawledPageCount}`);
-            // Won't allow resource link
-            if (typeof $ === "function") {
-                // $ is Cheerio by default, a lean implementation of core jQuery designed specifically for the server
-                var absoluteLinks = [];
-                $("a[href^='http']").each(function() {
-                    var link = $(this).attr('href');
-                    absoluteLinks.push(link);
-                });
-                // TODO: Need to find undefined scenario
-                if(absoluteLinks.length) {
-                    redisClient.sadd('seeds', absoluteLinks, function(err, reply) {
-                        console.log(`seeds:${reply}`);
-                    });
-                }
+            done();
+            return;
+        }
+
+        const $ = res.$;
+        crawledPageCount++;
+        console.log(`page count:${crawledPageCount}`);
+
+        // $ is only Cheerio-wrapped for HTML responses, not raw resources (images, etc).
+        if (typeof $ === 'function') {
+            const absoluteLinks = extractAbsoluteLinks($);
+            if (absoluteLinks.length) {
+                client
+                    .sAdd('seeds', absoluteLinks)
+                    .then((added) => console.log(`seeds added:${added}`))
+                    .catch((err) => console.error('Failed to store discovered seeds:', err));
             }
         }
+
         done();
-        if(crawledPageCount === 1000) {
-            process.exit();
-        }
-    }
+        exitWhenDone();
+    },
 });
 
-redisClient.srandmember('seeds', 1000, function(err, reply) {
-    crawlerInstance.queue(reply);
+async function main() {
+    await client.connect();
+    const seeds = await client.sRandMemberCount('seeds', config.pagesPerRun);
+    if (!seeds.length) {
+        console.log('No seed URLs available in redis; exiting.');
+        await client.quit();
+        return;
+    }
+    crawlerInstance.add(seeds);
+}
+
+main().catch((err) => {
+    console.error('Failed to start crawl run:', err);
+    process.exit(1);
 });

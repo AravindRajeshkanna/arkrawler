@@ -1,0 +1,26 @@
+arkrawler
+Copyright (c) 2017-2026 Aravind Rajesh Kanna
+
+This project is licensed under the ISC License (see LICENSE).
+
+This software depends on the following third-party open-source packages,
+each under its own license. Full license texts are included with each
+package under node_modules/ once installed via `npm install`, and are also
+available from the linked package registry pages.
+
+Runtime dependencies
+---------------------
+- crawler        MIT License      https://www.npmjs.com/package/crawler
+- redis          MIT License      https://www.npmjs.com/package/redis
+
+Development dependencies
+-------------------------
+- cheerio        MIT License      https://www.npmjs.com/package/cheerio
+- eslint         MIT License      https://www.npmjs.com/package/eslint
+- @eslint/js     MIT License      https://www.npmjs.com/package/@eslint/js
+- globals        MIT License      https://www.npmjs.com/package/globals
+- prettier       MIT License      https://www.npmjs.com/package/prettier
+
+Each of the above packages may itself depend on additional third-party
+packages; consult each package's own repository for its full dependency
+and license tree.

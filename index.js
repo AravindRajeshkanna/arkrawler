@@ -1,33 +1,52 @@
-// TODO: Need to maintain env
-const childProcess = require('child_process');
-const redis = require('redis');
-const fs = require('fs');
+import { spawn } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+import { createClient } from 'redis';
 
-// Redis
-const redisClient = redis.createClient();
+import { config } from './lib/config.js';
 
-// Store seed URLs in redis
-fs.readFile('./seed.json', 'utf8', function(err, data) {
-    if (err) {
-        return console.error(err);
-    }
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Loads the seed URL list and stores it in the shared `seeds` Redis set so
+ * crawler.js has somewhere to start from.
+ */
+async function seedRedis(client) {
+    const data = await readFile(config.seedFile, 'utf8');
     const urls = JSON.parse(data);
-    redisClient.sadd('seeds', urls, function(err, reply) {
-        console.log(`redis init:${reply}`);
-    });
-});
-
-const respawn = function() {
-    var crawler = childProcess.exec(`cd ${__dirname} && node crawler.js`, function(error, stdout, stderr) {
-        // TODO: Need to store it in file
-        // console.log('stdout: ' + stdout);
-        console.log(`stderr:${stderr}`);
-        if (error !== null) {
-            console.log(`exec error:${error}`);
-        }
-    });
-    crawler.on('exit', function(code, signal) {
-        crawler = respawn();
-    });
+    const added = await client.sAdd('seeds', urls);
+    console.log(`redis init: added ${added} new seed URL(s)`);
 }
-respawn();
+
+/**
+ * Runs crawler.js as a child process and respawns it whenever it exits, so a
+ * single crawl batch (see PAGES_PER_RUN) keeps the whole crawl going.
+ */
+function spawnCrawler() {
+    const child = spawn(process.execPath, ['crawler.js'], {
+        cwd: __dirname,
+        stdio: 'inherit',
+    });
+    child.on('exit', (code, signal) => {
+        console.log(`crawler.js exited (code=${code}, signal=${signal}), respawning...`);
+        spawnCrawler();
+    });
+    return child;
+}
+
+async function main() {
+    const client = createClient({ url: config.redisUrl });
+    client.on('error', (err) => console.error('Redis Client Error', err));
+
+    await client.connect();
+    await seedRedis(client);
+    await client.quit();
+
+    spawnCrawler();
+}
+
+main().catch((err) => {
+    console.error('Failed to start crawler:', err);
+    process.exit(1);
+});

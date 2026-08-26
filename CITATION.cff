@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: 'If you use this software, please cite it as below.'
+title: 'arkrawler'
+abstract: >-
+    A Node.js web crawler that starts from a large set of seed URLs, stores
+    the crawl frontier in Redis, and continuously discovers and crawls
+    outbound links.
+authors:
+    - family-names: 'Rajesh Kanna'
+      given-names: 'Aravind'
+repository-code: 'https://github.com/AravindRajeshkanna/arkrawler'
+url: 'https://github.com/AravindRajeshkanna/arkrawler'
+license: ISC
+version: 1.1.0
+date-released: '2026-08-27'
+keywords:
+    - crawler
+    - web-crawler
+    - redis
+    - node.js
