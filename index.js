@@ -1,10 +1,10 @@
 import { spawn } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import { createClient } from 'redis';
 
 import { config } from './lib/config.js';
+import { loadSeedUrls } from './lib/seed.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -13,9 +13,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * crawler.js has somewhere to start from.
  */
 async function seedRedis(client) {
-    const data = await readFile(config.seedFile, 'utf8');
-    const urls = JSON.parse(data);
-    const added = await client.sAdd('seeds', urls);
+    const urls = await loadSeedUrls(config.seedFile);
+    const added = await client.sAdd(config.seedsKey, urls);
     console.log(`redis init: added ${added} new seed URL(s)`);
 }
 

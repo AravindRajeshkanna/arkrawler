@@ -1,5 +1,7 @@
 # arkrawler
 
+[![CI](https://github.com/AravindRajeshkanna/arkrawler/actions/workflows/ci.yml/badge.svg)](https://github.com/AravindRajeshkanna/arkrawler/actions/workflows/ci.yml)
+
 A small Node.js web crawler that starts from a list of ~1,000,000 seed URLs
 ([seed.json](seed.json)), stores the frontier in Redis, and keeps crawling by
 respawning a worker process that pulls a random batch of URLs, fetches them,
@@ -15,9 +17,10 @@ extracts outbound links, and feeds them back into the seed set.
   parses each page with Cheerio, and adds every absolute `http(s)` link it
   finds back into `seeds`. Once it has crawled `PAGES_PER_RUN` pages it exits
   cleanly, which triggers the next respawn from `index.js`.
-- [lib/config.js](lib/config.js) and [lib/links.js](lib/links.js) hold the
-  small, dependency-light pieces of logic that are covered by unit tests in
-  [test/](test/).
+- [lib/](lib/) holds the small, dependency-light pieces of logic (config,
+  seed-file parsing, link extraction) that are covered by unit tests in
+  [test/](test/); [test/integration/](test/integration/) covers the crawl
+  loop end-to-end against a real Redis instance.
 
 ## Prerequisites
 
@@ -54,16 +57,30 @@ This seeds Redis from `seed.json` and starts the crawl loop. Stop it with
 | ----------------- | ------------------------ | ---------------------------------------------- |
 | `REDIS_URL`       | `redis://127.0.0.1:6379` | Redis connection string                        |
 | `SEED_FILE`       | `./seed.json`            | Path to the seed URL JSON file                 |
+| `SEEDS_KEY`       | `seeds`                  | Redis set used to store the crawl frontier     |
 | `PAGES_PER_RUN`   | `1000`                   | Pages crawled per `crawler.js` run before exit |
 | `MAX_CONNECTIONS` | `100`                    | Max concurrent HTTP connections while crawling |
 
 ## Development
 
 ```sh
-npm test          # run the unit test suite (node:test)
-npm run lint       # lint with ESLint
-npm run format      # format with Prettier
+npm test               # run the unit test suite (node:test, no external deps)
+npm run test:integration  # run crawler.js end-to-end against a real Redis instance
+npm run test:coverage     # unit tests with Node's built-in coverage report
+npm run lint            # lint with ESLint
+npm run format           # format with Prettier
 ```
+
+`npm run test:integration` requires a reachable Redis (it uses `REDIS_URL`,
+same as the app) and spins up a throwaway local HTTP server as the crawl
+target — it doesn't hit the network. It writes to a randomly-named Redis set
+(via `SEEDS_KEY`) and deletes it afterwards, so it's safe to run against a
+Redis instance you're also using for local development. If Redis isn't
+reachable, the test is skipped rather than failing.
+
+CI (see [.github/workflows/ci.yml](.github/workflows/ci.yml)) runs lint,
+formatting, unit tests, and the integration test (with a Redis service
+container) on every push and pull request.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution workflow.
 

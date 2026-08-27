@@ -34,7 +34,7 @@ const crawlerInstance = new Crawler({
             const absoluteLinks = extractAbsoluteLinks($);
             if (absoluteLinks.length) {
                 client
-                    .sAdd('seeds', absoluteLinks)
+                    .sAdd(config.seedsKey, absoluteLinks)
                     .then((added) => console.log(`seeds added:${added}`))
                     .catch((err) => console.error('Failed to store discovered seeds:', err));
             }
@@ -47,7 +47,7 @@ const crawlerInstance = new Crawler({
 
 async function main() {
     await client.connect();
-    const seeds = await client.sRandMemberCount('seeds', config.pagesPerRun);
+    const seeds = await client.sRandMemberCount(config.seedsKey, config.pagesPerRun);
     if (!seeds.length) {
         console.log('No seed URLs available in redis; exiting.');
         await client.quit();
