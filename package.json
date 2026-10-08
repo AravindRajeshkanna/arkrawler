@@ -21,7 +21,7 @@
     "license": "ISC",
     "dependencies": {
         "crawler": "^2.1.1",
-        "redis": "^6.2.1"
+        "redis": "^6.3.0"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
